@@ -165,13 +165,42 @@ python3 src/read_cache.py card
 
 `openclaw-ha` 本身建议作为独立项目存在。
 
-在 OpenClaw 中，更推荐采用：
-- 一个现有或增强后的 `home-assistant` skill
-- 由 skill 学会如何使用 `openclaw-ha`
+在 OpenClaw 中，当前推荐采用：
+- **继续保留一个 `home-assistant` skill**
+- 由该 skill 学会如何使用 `openclaw-ha`
 
 也就是说：
 - `openclaw-ha` 负责提供能力层
-- skill 负责告诉 agent 什么时候读取缓存、什么时候实时查询、什么时候刷新
+- `home-assistant` skill 负责告诉 agent 什么时候读取缓存、什么时候实时查询、什么时候刷新
+
+### 推荐职责划分
+
+#### `openclaw-ha` 负责
+- 状态同步
+- 事件监听
+- 缓存生成
+- 回答摘要生成
+- 本地运行与服务管理
+
+#### `home-assistant` skill 负责
+- 判断用户问题是“家庭感知”还是“实时控制”
+- 对高频状态问答优先使用缓存
+- 对控制类请求和高风险状态优先走实时 HA
+- 在缓存过期时触发刷新
+- 在 `openclaw-ha` 不可用时回退到传统 HA 路径
+
+### 为什么当前不新增第二个 skill
+
+因为当前阶段更重要的是：
+- 保持 agent 路由简单
+- 保持能力边界清楚
+- 先让现有 `home-assistant` skill 升级成“实时控制 + 感知接入”的统一入口
+
+只有在后续缓存感知逻辑显著复杂化时，再考虑是否拆出第二个 skill。
+
+更多说明见：
+- `docs/skill-integration-design.md`
+- `docs/home-assistant-skill-draft.md`
 
 ## 当前状态
 
