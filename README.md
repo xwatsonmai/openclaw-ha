@@ -239,7 +239,7 @@ healthcheck 会检查：
 当前 `sync_snapshot.py` 已支持两种模式：
 
 - **full**：拉取 `/api/states` 全量重建
-- **partial**：当监听器传入变更实体且本地已有 `raw_states.json` 时，仅拉取变更实体，再在本地重建摘要
+- **partial**：当监听器或 skill 控制流程传入变更实体且本地已有 `raw_states.json` 时，仅拉取变更实体，再在本地重建摘要
 
 说明：
 - 摘要仍然会整体重算

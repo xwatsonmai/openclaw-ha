@@ -20,6 +20,10 @@ let batchTimer = null;
 const pendingEntities = new Set();
 const lastEntityAcceptedAt = new Map();
 
+function cacheExists() {
+  return fs.existsSync(path.join(ROOT, 'data', 'summary.json'));
+}
+
 function ensureDirs() {
   fs.mkdirSync(path.join(ROOT, 'logs'), { recursive: true });
   fs.mkdirSync(path.join(ROOT, 'data'), { recursive: true });
@@ -195,7 +199,13 @@ function connect() {
     }
     if (authed && msg.id === 1 && msg.type === 'result') {
       logLine(`subscribe result: ${JSON.stringify(msg)}`);
-      if (msg.success && noiseRules.startup_sync !== false) triggerSync('startup', []);
+      if (msg.success && noiseRules.startup_sync !== false) {
+        if (cacheExists()) {
+          logLine('startup sync skipped: existing cache found');
+        } else {
+          triggerSync('startup', []);
+        }
+      }
       return;
     }
     if (msg.type !== 'event') return;
