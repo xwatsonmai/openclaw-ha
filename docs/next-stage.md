@@ -9,20 +9,25 @@
 - 别名映射
 - 定时刷新脚本
 - 结构化摘要 + 文本回答卡
+- WebSocket 事件监听
+- systemd user service
+- 开源结构整理
+- OpenClaw skill 集成设计
+- bootstrap / healthcheck 脚本
 
 ## 下一阶段优先级
 
-### P1. 正式接入智能管家回答流
-让状态问答优先读缓存。
+### P1. 进一步优化事件降噪
+- focus-first 触发策略
+- per-entity debounce
+- batching
 
-### P2. 事件驱动更新
-接入 Home Assistant WebSocket 或 webhook。
+### P2. 更稳的健康检查与运维说明
+- 增强 healthcheck 输出
+- 记录 listener / sync 状态指标
 
-### P3. 控制后立即刷新
-每次开关设备后，自动更新对应缓存。
+### P3. 局部缓存更新
+- 从“全量重建”演进到“局部更新 + 摘要重算”
 
-### P4. 关键设备告警
-对重点设备 unavailable 做更醒目的提醒。
-
-### P5. systemd / 守护化
-让刷新循环稳定后台运行。
+### P4. OpenClaw skill 适配落地
+- 将设计稿正式合并到 skill 工作流中
