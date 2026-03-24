@@ -39,5 +39,9 @@
     "sensor",
     "binary_sensor",
     "switch"
-  ]
+  ],
+  "focus_first": false,
+  "per_entity_debounce_seconds": 10,
+  "batch_window_seconds": 2,
+  "startup_sync": true
 }

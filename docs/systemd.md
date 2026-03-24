@@ -5,9 +5,6 @@
 项目内服务模板：
 - `systemd/openclaw-ha-ws.service`
 
-兼容旧文件名：
-- `systemd/ha-state-sync-ws.service`（已弃用，不建议继续使用）
-
 这是一个**示例模板**，其中路径需要按你的实际目录替换。
 
 安装位置：

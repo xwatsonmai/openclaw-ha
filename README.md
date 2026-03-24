@@ -32,6 +32,9 @@
 - 事件监听（WebSocket）
 - 定时轮询兜底
 - 事件降噪规则
+- focus-first 触发策略
+- per-entity debounce + batching
+- bootstrap / healthcheck 脚本
 - systemd user service 模板
 
 ## 能力定位
@@ -70,6 +73,15 @@ openclaw-ha/
 ## 初始化
 
 ### 1. 复制配置模板
+
+推荐直接运行：
+
+```bash
+cd openclaw-ha
+./scripts/bootstrap.sh
+```
+
+如果你想手动复制，也可以：
 
 ```bash
 cd openclaw-ha
@@ -140,6 +152,19 @@ python3 src/read_cache.py summary
 python3 src/read_cache.py card
 ```
 
+### 5. 健康检查
+
+```bash
+cd openclaw-ha
+./scripts/healthcheck.sh
+```
+
+healthcheck 会检查：
+- 配置文件是否存在
+- 缓存文件是否存在且最近是否有更新
+- WebSocket listener service 是否 active / enabled
+- 最近日志与事件数量
+
 ## systemd user service
 
 参考：
@@ -163,7 +188,7 @@ python3 src/read_cache.py card
 
 ## 与 OpenClaw skill 的关系
 
-`openclaw-ha` 本身建议作为独立项目存在。
+`openclaw-ha` 本身可以独立运行；OpenClaw 集成是推荐用法之一，但不是唯一用法。
 
 在 OpenClaw 中，当前推荐采用：
 - **继续保留一个 `home-assistant` skill**
