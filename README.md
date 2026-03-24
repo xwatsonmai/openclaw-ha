@@ -234,10 +234,21 @@ healthcheck 会检查：
 - 智能家居 Agent 的家庭状态上下文层
 - 后续扩展事件批处理、局部缓存更新、统一 Agent 接口的基础
 
+## 局部缓存更新
+
+当前 `sync_snapshot.py` 已支持两种模式：
+
+- **full**：拉取 `/api/states` 全量重建
+- **partial**：当监听器传入变更实体且本地已有 `raw_states.json` 时，仅拉取变更实体，再在本地重建摘要
+
+说明：
+- 摘要仍然会整体重算
+- 但对 Home Assistant 的 API 拉取已经从“全量”收敛到“按变更实体拉取”
+- 如果局部拉取失败，会自动回退到全量模式
+
 ## 后续可演进方向
 
 - 更通用的安装流程
-- 局部缓存更新
 - 更细粒度事件 batching / debounce
 - 多房间模板
 - 更标准的 agent adapter interface

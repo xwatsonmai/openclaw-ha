@@ -123,7 +123,8 @@ function triggerSync(reason, entityIds) {
     return;
   }
   lastSyncAt = now;
-  const result = spawnSync(PYTHON, [SYNC_SCRIPT], {
+  const args = [SYNC_SCRIPT, ...((entityIds || []).flatMap(entityId => ['--entity-id', entityId]))];
+  const result = spawnSync(PYTHON, args, {
     cwd: WORKSPACE,
     encoding: 'utf8',
     timeout: 30000,

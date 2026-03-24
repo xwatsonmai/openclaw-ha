@@ -87,9 +87,9 @@ def load_aliases():
     return load_json(ALIASES_PATH, {}) or {}
 
 
-def fetch_states(base_url, token):
+def api_request(base_url, token, endpoint):
     req = urllib.request.Request(
-        f"{base_url}/api/states",
+        f"{base_url}{endpoint}",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
@@ -97,6 +97,14 @@ def fetch_states(base_url, token):
     )
     with urllib.request.urlopen(req, timeout=20) as resp:
         return json.loads(resp.read().decode("utf-8"))
+
+
+def fetch_states(base_url, token):
+    return api_request(base_url, token, "/api/states")
+
+
+def fetch_state(base_url, token, entity_id):
+    return api_request(base_url, token, f"/api/states/{entity_id}")
 
 
 def infer_room(name, entity_id):
@@ -452,24 +460,123 @@ def write_text(path, content):
         f.write(content)
 
 
+def parse_entity_args(argv):
+    entity_ids = []
+    for arg in argv:
+        if arg.startswith("--entity-id="):
+            entity_ids.append(arg.split("=", 1)[1])
+        elif arg == "--entity-id":
+            continue
+        elif entity_ids and argv[argv.index(arg)-1] == "--entity-id":
+            entity_ids.append(arg)
+    deduped = []
+    seen = set()
+    for entity_id in entity_ids:
+        if entity_id and entity_id not in seen:
+            seen.add(entity_id)
+            deduped.append(entity_id)
+    return deduped
+
+
+def parse_entity_args_safe(argv):
+    entity_ids = []
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--entity-id" and i + 1 < len(argv):
+            entity_ids.append(argv[i + 1])
+            i += 2
+            continue
+        if arg.startswith("--entity-id="):
+            entity_ids.append(arg.split("=", 1)[1])
+        i += 1
+    deduped = []
+    seen = set()
+    for entity_id in entity_ids:
+        if entity_id and entity_id not in seen:
+            seen.add(entity_id)
+            deduped.append(entity_id)
+    return deduped
+
+
+def load_existing_raw_states():
+    raw = load_json(RAW_PATH, {}) or {}
+    states = raw.get("states") or []
+    if not isinstance(states, list):
+        return []
+    return states
+
+
+def merge_states(existing_states, updates):
+    index = {}
+    ordered = []
+    for item in existing_states:
+        entity_id = item.get("entity_id")
+        if not entity_id:
+            continue
+        index[entity_id] = item
+        ordered.append(entity_id)
+
+    for item in updates:
+        entity_id = item.get("entity_id")
+        if not entity_id:
+            continue
+        if entity_id not in index:
+            ordered.append(entity_id)
+        index[entity_id] = item
+
+    return [index[entity_id] for entity_id in ordered if entity_id in index]
+
+
 def main():
     try:
         base_url, token = load_ha_config()
         rules = load_rules()
         focus = load_focus_entities()
         aliases = load_aliases()
-        states = fetch_states(base_url, token)
+        changed_entity_ids = parse_entity_args_safe(sys.argv[1:])
+
+        refresh_mode = "full"
+        states = None
+        partial_failures = []
+
+        if changed_entity_ids and os.path.exists(RAW_PATH):
+            existing_states = load_existing_raw_states()
+            if existing_states:
+                refresh_mode = "partial"
+                updates = []
+                for entity_id in changed_entity_ids:
+                    try:
+                        updates.append(fetch_state(base_url, token, entity_id))
+                    except Exception as e:
+                        partial_failures.append({"entity_id": entity_id, "error": str(e)})
+                if partial_failures:
+                    refresh_mode = "full_fallback"
+                    states = fetch_states(base_url, token)
+                else:
+                    states = merge_states(existing_states, updates)
+
+        if states is None:
+            states = fetch_states(base_url, token)
+            refresh_mode = "full" if not changed_entity_ids else refresh_mode
+
         raw = {
             "generated_at": utc_now_iso(),
             "source": "home_assistant_api",
             "base_url": base_url,
             "entity_count": len(states),
+            "refresh_mode": refresh_mode,
+            "changed_entity_ids": changed_entity_ids,
             "states": states
         }
         summary = build_summary(states, rules, focus, aliases)
         brief = build_brief(summary)
         summary["brief"] = brief
         summary["answer_views"] = build_answer_views(summary, summary["focus"])
+        summary["refresh_mode"] = refresh_mode
+        summary["changed_entity_ids"] = changed_entity_ids
+        if partial_failures:
+            summary["partial_failures"] = partial_failures
         card = build_answer_card(summary)
         write_json(RAW_PATH, raw)
         write_json(SUMMARY_PATH, summary)
@@ -486,7 +593,10 @@ def main():
             "excluded_entities": summary["counts"]["excluded_entities"],
             "ignored_entities": summary["counts"]["ignored_entities"],
             "tracked_unavailable": summary["counts"]["unavailable"],
-            "focus_alerts": summary["counts"]["focus_alerts"]
+            "focus_alerts": summary["counts"]["focus_alerts"],
+            "refresh_mode": refresh_mode,
+            "changed_entity_count": len(changed_entity_ids),
+            "partial_failures": partial_failures
         }, ensure_ascii=False))
     except Exception as e:
         print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False))
