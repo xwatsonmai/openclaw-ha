@@ -1,0 +1,27 @@
+{
+  "lights": [
+    "light.example_living_room_main"
+  ],
+  "climates": [
+    "climate.example_study_room_ac"
+  ],
+  "fans": [
+    "fan.example_tower_fan"
+  ],
+  "covers": [
+    "cover.example_airer"
+  ],
+  "vacuums": [
+    "vacuum.example_robot"
+  ],
+  "environment": [
+    "sensor.example_study_temperature",
+    "sensor.example_study_humidity"
+  ],
+  "switches": [
+    "switch.example_ac_aux_heating"
+  ],
+  "critical_binary": [
+    "binary_sensor.example_front_door"
+  ]
+}

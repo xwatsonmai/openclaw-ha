@@ -1,0 +1,15 @@
+# runtime data
+/data/
+/logs/
+
+# local config instances
+/config/*.json
+!/config/*.example.json
+
+# python
+__pycache__/
+*.pyc
+
+# editor / os
+.DS_Store
+.env

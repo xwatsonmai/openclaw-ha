@@ -1,0 +1,43 @@
+{
+  "ignore_exact_entities": [
+    "sun.sun"
+  ],
+  "ignore_domains": [
+    "sun",
+    "update",
+    "weather",
+    "zone",
+    "counter",
+    "scene",
+    "script",
+    "automation",
+    "person",
+    "device_tracker",
+    "media_player",
+    "remote",
+    "select",
+    "button",
+    "number",
+    "text",
+    "input_text",
+    "input_number",
+    "input_boolean",
+    "calendar",
+    "todo"
+  ],
+  "ignore_entity_id_keywords": [
+    "indicator_light",
+    "prompt_tone",
+    "screen_display_alternate"
+  ],
+  "allow_domains": [
+    "light",
+    "climate",
+    "fan",
+    "cover",
+    "vacuum",
+    "sensor",
+    "binary_sensor",
+    "switch"
+  ]
+}

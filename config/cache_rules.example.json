@@ -1,0 +1,31 @@
+{
+  "exclude_name_keywords": [
+    "指示灯",
+    "提示音",
+    "备用开关"
+  ],
+  "exclude_entity_id_keywords": [
+    "indicator_light",
+    "prompt_tone",
+    "screen_display_alternate"
+  ],
+  "priority_domains": [
+    "light",
+    "climate",
+    "fan",
+    "cover",
+    "vacuum",
+    "sensor",
+    "binary_sensor",
+    "switch"
+  ],
+  "environment_keywords": ["temperature", "humidity", "pm2_5", "co2", "tvoc"],
+  "environment_device_classes": ["temperature", "humidity", "pm25", "carbon_dioxide", "volatile_organic_compounds"],
+  "critical_binary_keywords": ["door", "window", "motion", "occupancy", "presence", "smoke", "gas", "leak", "lock"],
+  "switch_include_keywords": ["电辅热", "aux heating"],
+  "include_name_keywords": ["客厅", "餐厅", "书房", "卧室", "空调", "灯", "风扇", "窗帘", "晾衣架", "扫地机", "门", "窗", "人体", "温度", "湿度"],
+  "freshness": {
+    "fresh_seconds": 60,
+    "stale_seconds": 300
+  }
+}

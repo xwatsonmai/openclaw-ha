@@ -1,0 +1,9 @@
+{
+  "vacuum.example_robot": "扫地机",
+  "fan.example_tower_fan": "塔扇",
+  "cover.example_airer": "晾衣架",
+  "climate.example_study_room_ac": "书房空调",
+  "light.example_living_room_main": "客厅主灯",
+  "sensor.example_study_temperature": "书房温度",
+  "sensor.example_study_humidity": "书房湿度"
+}

@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenClaw HA WebSocket Listener
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/path/to/openclaw-ha
+ExecStart=/usr/bin/env node %h/path/to/openclaw-ha/src/ha_ws_listener.js
+Restart=always
+RestartSec=5
+Environment=HA_WS_DEBOUNCE_SECONDS=2
+Environment=HA_WS_RECONNECT_SECONDS=5
+# Optional:
+# Environment=HA_URL=http://homeassistant.local:8123
+# Environment=HA_TOKEN=YOUR_LONG_LIVED_ACCESS_TOKEN
+
+[Install]
+WantedBy=default.target
