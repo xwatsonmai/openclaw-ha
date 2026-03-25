@@ -37,13 +37,101 @@
 
 ## 快速开始
 
+这里给两套入口：
+
+- **给 Agent 的快速开始**：适合直接把一句话 + git 链接丢给 Agent
+- **给人类手动安装的快速开始**：适合自己手动部署
+
+### 给 Agent 的快速开始
+
+如果你想把这件事直接交给 Agent，最短可复制版可以直接用这个：
+
+```text
+请阅读该项目说明，并完成安装与接入：
+https://github.com/xwatsonmai/openclaw-ha
+
+目标：
+- 拉取这个 git 项目到当前 OpenClaw 工作区
+- 按 README 完成安装
+- 配置 Home Assistant URL / token
+- 配置重点设备和别名
+- 运行首次同步
+- 启动 WebSocket listener
+- 运行 healthcheck
+- 如果当前工作区已有 home-assistant skill，则把它接到 openclaw-ha
+- 最后输出安装结果、服务状态、缓存状态、剩余待补配置
+
+要求：
+- 不要把真实 token 提交进 git
+- 本地 config / data / logs 不入库
+- 缺少必要信息时再问我
+```
+
+### 快速开始（如果你是 Agent）
+
+1. 拉取本项目
+
+```bash
+cd /path/to/openclaw-workspace
+git clone https://github.com/xwatsonmai/openclaw-ha.git
+cd openclaw-ha
+```
+
+2. 阅读 README，并按快速开始执行
+
+3. 运行 bootstrap 初始化配置
+
+```bash
+./scripts/bootstrap.sh
+```
+
+4. 配置 HA URL 和 token
+- 优先写入 `config/ha.json`
+- 或使用环境变量 `HA_URL` / `HA_TOKEN`
+
+5. 配置重点设备与别名
+- `config/focus_entities.json`
+- `config/entity_aliases.json`
+
+6. 运行首次同步
+
+```bash
+./scripts/run_once.sh
+```
+
+7. 启动 listener
+- 先手动验证 `./scripts/run_ws_listener.sh`
+- 长期运行优先配置 `systemd --user`
+
+8. 运行 healthcheck
+
+```bash
+./scripts/healthcheck.sh
+```
+
+9. 如果工作区已有 `skills/home-assistant`
+- 不要重复造第二套 skill
+- 直接把现有 `home-assistant` skill 接到 `openclaw-ha`
+- 让它形成：
+  - home overview 优先读缓存
+  - 控制类请求走实时 HA
+  - 控制后做 delayed + throttled partial refresh
+
+10. 最后汇报
+- 改了哪些文件
+- 当前服务是否运行
+- 缓存是否生成成功
+- 还缺什么配置
+
+### 给人类手动安装的快速开始
+
 如果你的目标是：
 
 > 让 OpenClaw 里的 Agent 尽快接入 HA，并获得“控制 + 家庭状态感知”能力
 
 按下面做就行。
 
-### 第 1 步：准备项目
+#### 第 1 步：准备项目
 
 ```bash
 cd /path/to/your/openclaw-workspace
@@ -59,7 +147,7 @@ cd openclaw-ha
 - `config/ws_noise_rules.json`
 - `config/ha.json`
 
-### 第 2 步：填写 HA 配置
+#### 第 2 步：填写 HA 配置
 
 编辑：
 
@@ -83,7 +171,7 @@ export HA_URL="http://homeassistant.local:8123"
 export HA_TOKEN="YOUR_LONG_LIVED_ACCESS_TOKEN"
 ```
 
-### 第 3 步：配置重点设备
+#### 第 3 步：配置重点设备
 
 至少调整这两份：
 
@@ -94,7 +182,7 @@ export HA_TOKEN="YOUR_LONG_LIVED_ACCESS_TOKEN"
 - Agent 最关心哪些设备
 - 回答时显示什么名字
 
-### 第 4 步：先跑一次同步
+#### 第 4 步：先跑一次同步
 
 ```bash
 ./scripts/run_once.sh
@@ -106,7 +194,7 @@ export HA_TOKEN="YOUR_LONG_LIVED_ACCESS_TOKEN"
 - `data/answer_brief.json`
 - `data/answer_card.md`
 
-### 第 5 步：启动事件监听
+#### 第 5 步：启动事件监听
 
 先手动跑：
 
@@ -124,7 +212,7 @@ systemctl --user enable --now openclaw-ha-ws.service
 systemctl --user status openclaw-ha-ws.service
 ```
 
-### 第 6 步：检查健康状态
+#### 第 6 步：检查健康状态
 
 ```bash
 ./scripts/healthcheck.sh
