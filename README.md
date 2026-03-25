@@ -64,6 +64,8 @@ https://github.com/xwatsonmai/openclaw-ha
 要求：
 - 不要把真实 token 提交进 git
 - 本地 config / data / logs 不入库
+- 首次安装时只把 HA URL / token 作为必需输入
+- `focus_entities` / `entity_aliases` / 规则配置优先自动生成或后补
 - 缺少必要信息时再问我
 ```
 
@@ -88,10 +90,13 @@ cd openclaw-ha
 4. 配置 HA URL 和 token
 - 优先写入 `config/ha.json`
 - 或使用环境变量 `HA_URL` / `HA_TOKEN`
+- 这是首次安装唯一必需的配置输入
 
-5. 配置重点设备与别名
-- `config/focus_entities.json`
-- `config/entity_aliases.json`
+5. 对其余配置采用“先默认、后补充”策略
+- `focus_entities.json` 可由 Agent 先生成初始版本
+- `entity_aliases.json` 可先直接使用 HA friendly_name
+- `cache_rules.json` / `ws_noise_rules.json` 默认先用项目内置规则
+- 这些都不应阻塞首次安装
 
 6. 运行首次同步
 
@@ -112,6 +117,7 @@ cd openclaw-ha
 9. 如果工作区已有 `skills/home-assistant`
 - 不要重复造第二套 skill
 - 直接把现有 `home-assistant` skill 接到 `openclaw-ha`
+- 初始化过程中，除 `ha.json` 外，其余配置优先自动生成初始版本或延后补齐
 - 让它形成：
   - home overview 优先读缓存
   - 控制类请求走实时 HA
@@ -140,16 +146,16 @@ cd openclaw-ha
 ./scripts/bootstrap.sh
 ```
 
-这一步会初始化：
-- `config/cache_rules.json`
-- `config/focus_entities.json`
-- `config/entity_aliases.json`
-- `config/ws_noise_rules.json`
+这一步会准备配置文件模板。
+
+但在首次安装时，你只需要优先关心：
 - `config/ha.json`
 
-#### 第 2 步：填写 HA 配置
+其他配置文件先不用急着改，可以后补。
 
-编辑：
+#### 第 2 步：填写唯一必需配置：HA 配置
+
+首次安装时，**唯一必需的配置就是**：
 
 ```bash
 config/ha.json
@@ -171,16 +177,21 @@ export HA_URL="http://homeassistant.local:8123"
 export HA_TOKEN="YOUR_LONG_LIVED_ACCESS_TOKEN"
 ```
 
-#### 第 3 步：配置重点设备
+#### 第 3 步：先直接运行，不必先配其他文件
 
-至少调整这两份：
+除了 `config/ha.json` 之外，其他配置都不再视为首次安装门槛：
 
 - `config/focus_entities.json`
 - `config/entity_aliases.json`
+- `config/cache_rules.json`
+- `config/ws_noise_rules.json`
 
-它们决定：
-- Agent 最关心哪些设备
-- 回答时显示什么名字
+这些文件都可以：
+- 先使用默认值
+- 在初始化过程中由 Agent 自动生成初始版本
+- 在后续使用中逐步补充和调整
+
+也就是说，**第一次安装时，先把 `ha.json` 配好就可以继续往下走。**
 
 #### 第 4 步：先跑一次同步
 
@@ -334,6 +345,22 @@ systemctl --user status openclaw-ha-ws.service
 - 避免回答还停留在旧状态
 
 ---
+
+## 配置原则
+
+### 首次安装唯一必需
+- `config/ha.json`
+
+### 可以自动生成 / 可后补
+- `config/focus_entities.json`
+- `config/entity_aliases.json`
+- `config/cache_rules.json`
+- `config/ws_noise_rules.json`
+
+推荐原则：
+- 首次安装只要求用户提供 HA URL / token
+- 其他配置优先让 Agent 自动生成初始版本
+- 后续在真实使用中逐步补齐与调整
 
 ## 当前能力
 
