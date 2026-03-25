@@ -35,12 +35,12 @@ cache_status_line() {
   local age="$1"
   local label="$2"
   if [ "$age" -le "$FRESH_SECONDS" ]; then
-    ok "$label freshness=green age_seconds=$age"
+    ok "$label freshness=green age_seconds=$age action=none"
   elif [ "$age" -le "$STALE_SECONDS" ]; then
-    warn "$label freshness=yellow age_seconds=$age"
+    warn "$label freshness=yellow age_seconds=$age action=consider_refresh"
     mark_warn
   else
-    crit "$label freshness=red age_seconds=$age"
+    crit "$label freshness=red age_seconds=$age action=refresh_now"
     mark_crit
   fi
 }
@@ -113,16 +113,16 @@ PY
 fi
 
 if systemctl --user is-active --quiet openclaw-ha-ws.service; then
-  ok "openclaw-ha-ws.service is active"
+  ok "openclaw-ha-ws.service is active action=none"
 else
-  crit "openclaw-ha-ws.service is not active"
+  crit "openclaw-ha-ws.service is not active action=systemctl --user restart openclaw-ha-ws.service"
   mark_crit
 fi
 
 if systemctl --user is-enabled --quiet openclaw-ha-ws.service; then
-  ok "openclaw-ha-ws.service is enabled"
+  ok "openclaw-ha-ws.service is enabled action=none"
 else
-  warn "openclaw-ha-ws.service is not enabled"
+  warn "openclaw-ha-ws.service is not enabled action=systemctl --user enable --now openclaw-ha-ws.service"
   mark_warn
 fi
 
@@ -144,8 +144,18 @@ if [ -f data/recent_events.jsonl ]; then
   event_lines=$(wc -l < data/recent_events.jsonl)
   info "recent_events lines: $event_lines"
 else
-  warn "data/recent_events.jsonl missing"
+  warn "data/recent_events.jsonl missing action=check_listener_or_trigger_refresh"
   mark_warn
 fi
 
-info "overall_status=$OVERALL"
+case "$OVERALL" in
+  OK)
+    info "overall_status=OK suggested_action=none"
+    ;;
+  WARN)
+    info "overall_status=WARN suggested_action=review_healthcheck_and_consider_refresh"
+    ;;
+  CRIT)
+    info "overall_status=CRIT suggested_action=restart_listener_then_run_scripts/run_once.sh"
+    ;;
+esac
