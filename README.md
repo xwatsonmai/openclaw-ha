@@ -66,7 +66,9 @@ https://github.com/xwatsonmai/openclaw-ha
 - 本地 config / data / logs 不入库
 - 首次安装时只把 HA URL / token 作为必需输入
 - `focus_entities` / `entity_aliases` / 规则配置优先自动生成或后补
-- 缺少必要信息时再问我
+- Agent 默认不拥有 HA URL / token
+- 如果当前工作区里没有现成 HA 配置，必须先询问用户
+- 如用户没有 token，需先指导用户在 Home Assistant 中生成 long-lived access token
 ```
 
 ### 快速开始（如果你是 Agent）
@@ -91,6 +93,8 @@ cd openclaw-ha
 - 优先写入 `config/ha.json`
 - 或使用环境变量 `HA_URL` / `HA_TOKEN`
 - 这是首次安装唯一必需的配置输入
+- Agent 默认不应假设自己已经知道这些值
+- 如果当前工作区未发现现有 HA 配置，则必须先询问用户
 
 5. 对其余配置采用“先默认、后补充”策略
 - `focus_entities.json` 可由 Agent 先生成初始版本
@@ -161,6 +165,11 @@ cd openclaw-ha
 config/ha.json
 ```
 
+但要注意：
+- Agent 默认通常并不知道你的 HA URL 和 token
+- 如果工作区里不存在现有配置，就需要先向用户询问
+- 如果用户还没有 token，需要先引导用户去 Home Assistant 生成
+
 内容示例：
 
 ```json
@@ -176,6 +185,28 @@ config/ha.json
 export HA_URL="http://homeassistant.local:8123"
 export HA_TOKEN="YOUR_LONG_LIVED_ACCESS_TOKEN"
 ```
+
+### 如何获取 HA URL 和 token
+
+#### HA URL
+通常会是以下几种之一：
+- `http://homeassistant.local:8123`
+- `http://<局域网IP>:8123`
+- 你自己配置的 Home Assistant 域名
+
+#### Long-lived access token
+在 Home Assistant Web 页面中：
+
+1. 打开 Home Assistant
+2. 点击左下角用户头像 / Profile
+3. 找到 **Long-Lived Access Tokens**
+4. 创建一个新的 token
+5. 复制后填入 `config/ha.json` 或环境变量
+
+注意：
+- token 通常只显示一次
+- 不要提交进 git
+- 不要发到公开仓库或公开聊天记录里
 
 #### 第 3 步：先直接运行，不必先配其他文件
 
@@ -350,6 +381,11 @@ systemctl --user status openclaw-ha-ws.service
 
 ### 首次安装唯一必需
 - `config/ha.json`
+- 或等价的 `HA_URL` / `HA_TOKEN` 环境变量
+
+说明：
+- 这通常不是 Agent 默认已知的信息
+- 如果当前环境里不存在现成配置，Agent 应先询问用户
 
 ### 可以自动生成 / 可后补
 - `config/focus_entities.json`
